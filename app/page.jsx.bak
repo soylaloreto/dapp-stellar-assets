@@ -1,12 +1,10 @@
-// src/app/page.jsx
-
 'use client';
 
 import { useState, useEffect } from 'react';
-// Importar nuestros componentes
 import WalletConnect from '../components/WalletConnect';
 import AssetBalance from '../components/AssetBalance';
 import CreateTrustline from '../components/CreateTrustline';
+
 
 /**
  * Página Principal de la dApp
