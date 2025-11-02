@@ -1,9 +1,6 @@
-// src/components/AssetBalance.tsx
-
 "use client";
 
 import { useState, useEffect } from "react";
-import { Horizon } from "@stellar/stellar-sdk";
 import { HORIZON_URLS } from "../lib/constants";
 import Spinner from "./Spinner";
 import { Balance, AssetBalanceProps } from "../types/stellar";
@@ -24,6 +21,7 @@ export default function AssetBalance({ publicKey, asset }: AssetBalanceProps) {
 
   /**
    * Función para consultar el balance desde Stellar
+   * Import dinámico de stellar-sdk para evitar bundling/SSR issues
    */
   const fetchBalance = async (): Promise<void> => {
     if (!publicKey) {
@@ -35,7 +33,9 @@ export default function AssetBalance({ publicKey, asset }: AssetBalanceProps) {
     setError(null);
 
     try {
-      const server = new Horizon.Server(HORIZON_URLS.testnet);
+      // Import dinámico para que stellar-sdk no entre en el bundle SSR
+      const { Server } = await import("stellar-sdk");
+      const server = new Server(HORIZON_URLS.testnet);
       const account = await server.loadAccount(publicKey);
 
       // Buscar el asset específico
@@ -54,7 +54,7 @@ export default function AssetBalance({ publicKey, asset }: AssetBalanceProps) {
         err.response &&
         typeof err.response === "object" &&
         "status" in err.response &&
-        err.response.status === 404
+        (err.response as any).status === 404
       ) {
         setError("Cuenta no encontrada. ¿Tienes XLM en testnet?");
       } else {
