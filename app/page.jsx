@@ -49,14 +49,16 @@ export default function Home() {
    * Solo si hay wallet conectada
    */
   useEffect(() => {
-    if (publicKey) {
-      const interval = setInterval(() => {
-        setRefreshKey(prev => prev + 1);
-      }, 10000);  // 10 segundos
-      
-      return () => clearInterval(interval);  // Cleanup
-    }
-  }, [publicKey]);
+  if (publicKey) {
+    const interval = setInterval(() => {
+      setRefreshKey(prev => prev + 1);
+    }, 10000);  // 10 segundos
+
+    // Limpieza al desmontar o cambiar dependencias
+    return () => clearInterval(interval);
+  }
+}, [publicKey]);  // Dependencia publicKey para recrear el intervalo solo si cambia
+
 
   // ========== RENDER ==========
   

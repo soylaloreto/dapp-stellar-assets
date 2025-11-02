@@ -17,32 +17,15 @@ export default function WalletConnect(_: Props) {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    let mounted = true;
-    const check = () => {
-      if (typeof window !== "undefined" && (window.freighter || window.freighterApi)) {
-        if (mounted) setHasFreighter(true);
-        return true;
-      }
-      return false;
-    };
+  if (!publicKey) return;
 
-    if (!check()) {
-      let tries = 0;
-      const id = setInterval(() => {
-        tries += 1;
-        if (check() || tries >= 5) {
-          clearInterval(id);
-          if (mounted) setChecking(false);
-        }
-      }, 400);
-      return () => {
-        mounted = false;
-        clearInterval(id);
-      };
-    } else {
-      setChecking(false);
-    }
-  }, []);
+  const interval = setInterval(() => {
+    setRefreshKey(prev => prev + 1);
+  }, 10000);
+
+  return () => clearInterval(interval);
+}, [publicKey]);
+
 
   const handleConnect = async () => {
     const api = window.freighterApi || window.freighter;

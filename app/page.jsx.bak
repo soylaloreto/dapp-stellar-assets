@@ -46,15 +46,16 @@ export default function Home() {
    * useEffect: Refresh automático del balance cada 10 segundos
    * Solo si hay wallet conectada
    */
-  useEffect(() => {
-    if (publicKey) {
-      const interval = setInterval(() => {
-        setRefreshKey(prev => prev + 1);
-      }, 10000);  // 10 segundos
-      
-      return () => clearInterval(interval);  // Cleanup
-    }
-  }, [publicKey]);
+useEffect(() => {
+  if (!publicKey) return;
+
+  const interval = setInterval(() => {
+    setRefreshKey(prev => prev + 1);
+  }, 10000); // 10 segundos
+
+  return () => clearInterval(interval); // Limpia el intervalo cuando se desmonta o cambia publicKey
+}, [publicKey]);
+
 
   // ========== RENDER ==========
   
