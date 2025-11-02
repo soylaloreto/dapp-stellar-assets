@@ -19,6 +19,18 @@ export default function CreateTrustline({ publicKey, asset }: any) {
     setError(null);
 
     try {
+    // Import dinámico defensivo para stellar-sdk
+      const mod = await import("stellar-sdk");
+      const sdk = (mod as any).default ?? mod;
+      const { Server, TransactionBuilder, Networks, Operation, Keypair } = sdk;
+
+      const server = new Server(HORIZON_URLS.testnet);
+      const account = await server.loadAccount(publicKey);
+
+      // ... tu lógica existente para procesar account ...
+    } catch (err) {
+      // manejo de errores existente
+    }
       const { Server, TransactionBuilder, Networks, Operation, Keypair } =
         await import("stellar-sdk");
 
