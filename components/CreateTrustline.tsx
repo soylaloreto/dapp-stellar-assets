@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { HORIZON_URLS } from "../lib/constants";
 import Spinner from "./Spinner";
-// importa o define tipos locales según necesites
 
 export default function CreateTrustline({ publicKey, asset }: any) {
   const [loading, setLoading] = useState(false);
@@ -19,32 +18,22 @@ export default function CreateTrustline({ publicKey, asset }: any) {
     setError(null);
 
     try {
-    // Import dinámico defensivo para stellar-sdk
+      // Import dinámico defensivo para que stellar-sdk no entre en el bundle SSR
       const mod = await import("stellar-sdk");
       const sdk = (mod as any).default ?? mod;
-      const { Server, TransactionBuilder, Networks, Operation, Keypair } = sdk;
+      const { Server, TransactionBuilder, Networks, Operation, Asset } = sdk;
 
       const server = new Server(HORIZON_URLS.testnet);
       const account = await server.loadAccount(publicKey);
 
-      // ... tu lógica existente para procesar account ...
-    } catch (err) {
-      // manejo de errores existente
-    }
-      const { Server, TransactionBuilder, Networks, Operation, Keypair } =
-        await import("stellar-sdk");
-
-      const server = new Server(HORIZON_URLS.testnet);
-      const account = await server.loadAccount(publicKey);
-
-      // Construye transacción mínima para crear trustline (AJUSTA segun tu flow)
+      // Construye transacción mínima para crear trustline (AJUSTA según tu flow)
       const tx = new TransactionBuilder(account, {
         fee: "100",
         networkPassphrase: Networks.TESTNET,
       })
         .addOperation(
           Operation.changeTrust({
-            asset: new (await import("stellar-sdk")).Asset(asset.code, asset.issuer),
+            asset: new Asset(asset.code, asset.issuer),
             limit: "1000000",
           })
         )
@@ -52,18 +41,19 @@ export default function CreateTrustline({ publicKey, asset }: any) {
         .build();
 
       // Aquí deberías pedir al usuario que firme con su wallet (Freighter u otra)
-      // Ejemplo de placeholder:
-      // const signed = await window.freighterApi.signTransaction(tx.toXDR());
-      // await server.submitTransaction(signed);
+      // Placeholder: implementar firmado externo y envío a Horizon
+      // Ejemplo conceptual:
+      // const signedXDR = await window.freighterApi.signTransaction(tx.toXDR());
+      // await server.submitTransaction(signedXDR);
 
       // Para demo simplemente mostramos éxito
       setLoading(false);
       alert("Trustline creada (simulación). Implementa el firmado con Freighter.");
-    } catch (err: unknown) {
+    } catch (err) {
       const msg =
         err && typeof err === "object" && "message" in err
           ? String((err as any).message)
-          : "Error desconocido";
+          : String(err);
       setError(msg);
       console.error("Error creando trustline:", err);
       setLoading(false);
