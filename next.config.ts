@@ -1,31 +1,17 @@
-import type { NextConfig } from 'next';
-
-const nextConfig: NextConfig = {
-  reactStrictMode: true,
-  turbopack: {}, // activa Turbopack sin configuraciones inválidas
+// next.config.ts — temporal, diagnóstico. No dejar en producción.
+module.exports = {
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: "/(.*)",
         headers: [
           {
-            key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              "script-src 'self'",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data:",
-              "connect-src 'self' https://api.freighter.app https://*.stellar.org",
-              "frame-src 'self'",
-              "object-src 'none'",
-              "base-uri 'self'",
-              "form-action 'self'"
-            ].join('; '),
+            key: "Content-Security-Policy",
+            value:
+              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://api.freighter.app https://*.stellar.org https://horizon-testnet.stellar.org; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';",
           },
         ],
       },
     ];
   },
 };
-
-export default nextConfig;
