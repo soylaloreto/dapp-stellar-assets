@@ -25,20 +25,45 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Script cliente: renombra y elimina temporalmente window.ethereum para evitar auto-connect de MetaMask durante pruebas */}
+        {/* Script cliente: bloquear temporalmente window.ethereum y añadir mock Freighter si no hay proveedor real */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
                 try {
-                  if (typeof window !== 'undefined' && window.ethereum) {
-                    // Guardar backup para poder restaurarlo más tarde si es necesario
-                    try { window.__ethereum_backup_for_local_dev = window.ethereum; } catch(e) {}
-                    try { delete window.ethereum; } catch(e) {}
-                    console.info('[dev] window.ethereum temporarily removed to force using Freighter only');
+                  if (typeof window !== 'undefined') {
+                    // 1) Backups y eliminación temporal de MetaMask (evita auto-connect no deseado)
+                    if (window.ethereum) {
+                      try { window.__ethereum_backup_for_local_dev = window.ethereum; } catch(e) {}
+                      try { delete window.ethereum; } catch(e) {}
+                      console.info('[dev] window.ethereum temporarily removed to force using Freighter only');
+                    }
+
+                    // 2) Inyección de mock de Freighter solo si no hay proveedor real
+                    if (!window.freighterApi && !window.freighter && !window.freighterConnect) {
+                      window.freighterApi = {
+                        version: 'mock-0.1',
+                        connect: async function() {
+                          console.info('[mock freighter] connect() called');
+                          return { success: true };
+                        },
+                        getPublicKey: async function() {
+                          console.info('[mock freighter] getPublicKey() called');
+                          return 'GMOCKEXAMPLEXMOCKPUBLICKEY1234567890ABCDEFGHI';
+                        },
+                        request: async function(opts) {
+                          console.info('[mock freighter] request()', opts);
+                          if (opts && opts.method === 'getPublicKey') return 'GMOCKEXAMPLEXMOCKPUBLICKEY1234567890ABCDEFGHI';
+                          return { ok: true };
+                        }
+                      };
+                      console.info('[mock freighter] injected for local testing');
+                    } else {
+                      console.info('[mock freighter] real provider present or previously injected; mock skipped');
+                    }
                   }
                 } catch(e) {
-                  // no-op
+                  console.warn('mock freighter injection failed', e);
                 }
               })();
             `,
