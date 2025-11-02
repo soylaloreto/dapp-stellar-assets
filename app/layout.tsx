@@ -24,9 +24,28 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <head>
+        {/* Script cliente: renombra y elimina temporalmente window.ethereum para evitar auto-connect de MetaMask durante pruebas */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  if (typeof window !== 'undefined' && window.ethereum) {
+                    // Guardar backup para poder restaurarlo más tarde si es necesario
+                    try { window.__ethereum_backup_for_local_dev = window.ethereum; } catch(e) {}
+                    try { delete window.ethereum; } catch(e) {}
+                    console.info('[dev] window.ethereum temporarily removed to force using Freighter only');
+                  }
+                } catch(e) {
+                  // no-op
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
       </body>
     </html>
