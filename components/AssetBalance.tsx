@@ -33,10 +33,13 @@ export default function AssetBalance({ publicKey, asset }: AssetBalanceProps) {
     setError(null);
 
     try {
-      // Import dinámico para que stellar-sdk no entre en el bundle SSR
-      const { Server } = await import("stellar-sdk");
+     // Import dinámico defensivo para que stellar-sdk no entre en el bundle SSR
+      const mod = await import("stellar-sdk");
+      const sdk = (mod as any).default ?? mod;
+      const Server = sdk.Server;
       const server = new Server(HORIZON_URLS.testnet);
       const account = await server.loadAccount(publicKey);
+
 
       // Buscar el asset específico
       const assetBalance = account.balances.find(
